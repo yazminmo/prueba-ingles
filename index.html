@@ -5,170 +5,134 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prueba de Nivel de Inglés</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #e6f3ff;
-        }
-        h1, h2 {
-            color: #006699;
-        }
-        .test-section {
-            background-color: #ffffff;
-            border: 1px solid #b3d9ff;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 12px 20px;
-            box-sizing: border-box;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            background-color: #f8f8f8;
-            resize: none;
-        }
-        #timer {
-            font-size: 24px;
-            color: #006699;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <h1>Prueba de Nivel de Inglés</h1>
-    
-    <div class="test-section" id="writing-test">
+
+    <div id="writing-test" class="test-section">
         <h2>Prueba 1: Escritura</h2>
         <p>Tema: <span id="writing-topic"></span></p>
-        <textarea id="writing-area" placeholder="Escribe tu composición aquí..." onpaste="return false;"></textarea>
+        <textarea id="writing-area" rows="10" cols="50"></textarea>
         <p>Caracteres restantes: <span id="char-count">500</span></p>
-        <div id="timer">Tiempo restante: 10:00</div>
-        <button id="start-writing" onclick="startWritingTest()">Comenzar prueba</button>
-        <button id="submit-writing" onclick="submitWriting()" class="hidden">Enviar</button>
+        <div id="writing-timer">Tiempo restante: <span>10:00</span></div>
+        <button onclick="startWritingTest()">Comenzar prueba</button>
+        <button onclick="submitWritingTest()">Enviar</button>
     </div>
 
-    <div class="test-section hidden" id="listening-test">
+    <div id="listening-test" class="test-section hidden">
         <h2>Prueba 2: Escucha</h2>
-        <!-- Contenido de la prueba de escucha -->
+        <p>Tema: <span id="listening-topic"></span></p>
+        <audio id="audio-player" controls>
+            <source id="audio-source" src="" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <p>Reproducciones restantes: <span id="plays-left">2</span></p>
+        <div id="listening-timer">Tiempo restante: <span>05:00</span></div>
+        <div id="questions-container"></div>
+        <button onclick="submitListeningTest()">Enviar respuestas</button>
     </div>
 
-    <div class="test-section hidden" id="speaking-test">
-        <h2>Prueba 3: Conversación</h2>
-        <!-- Contenido de la prueba de conversación -->
-    </div>
-
-    <div class="test-section hidden" id="results">
-        <h2>Prueba 4: Resultados</h2>
-        <!-- Contenido de los resultados -->
+    <div id="results" class="test-section hidden">
+        <h2>Resultados</h2>
+        <div id="results-container"></div>
     </div>
 
     <script>
-        // Configuración (en un escenario real, esto vendría de una base de datos o API)
-        const topics = [
-            "Describe tu día ideal",
-            "¿Cómo crees que será el futuro en 100 años?",
-            "Cuenta una experiencia memorable de tu pasado"
-        ];
-        const timeLimit = 10 * 60; // 10 minutos en segundos
-        const charLimit = 500;
-
-        let currentTopic = '';
-        let timer;
-        let remainingTime = timeLimit;
+        // Variables globales
+        let writingTopics = ['Viajes', 'Tecnología', 'Medio ambiente'];
+        let listeningTopics = ['Entrevista de trabajo', 'Conversación casual', 'Discusión académica'];
+        let currentAudioPlays = 0;
+        let maxAudioPlays = 2;
+        let numberOfListeningTests = 3; // Configurable por el administrador
 
         function startWritingTest() {
-            document.getElementById('start-writing').classList.add('hidden');
-            document.getElementById('submit-writing').classList.remove('hidden');
-            currentTopic = topics[Math.floor(Math.random() * topics.length)];
-            document.getElementById('writing-topic').textContent = currentTopic;
-            document.getElementById('writing-area').disabled = false;
-            startTimer();
+            document.getElementById('writing-topic').textContent = writingTopics[Math.floor(Math.random() * writingTopics.length)];
+            startTimer('writing-timer', 600, finishWritingTest);
         }
 
-        function startTimer() {
-            timer = setInterval(() => {
-                remainingTime--;
-                const minutes = Math.floor(remainingTime / 60);
-                const seconds = remainingTime % 60;
-                document.getElementById('timer').textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                if (remainingTime <= 0) {
-                    clearInterval(timer);
-                    submitWriting();
+        function submitWritingTest() {
+            // Lógica para enviar la prueba de escritura
+            document.getElementById('writing-test').classList.add('hidden');
+            document.getElementById('listening-test').classList.remove('hidden');
+            startListeningTest();
+        }
+
+        function startListeningTest() {
+            document.getElementById('listening-topic').textContent = listeningTopics[Math.floor(Math.random() * listeningTopics.length)];
+            document.getElementById('audio-source').src = `audio/${document.getElementById('listening-topic').textContent.toLowerCase().replace(' ', '_')}.mp3`;
+            document.getElementById('audio-player').load();
+            generateQuestions();
+            startTimer('listening-timer', 300, finishListeningTest);
+        }
+
+        function generateQuestions() {
+            // Aquí se generarían las preguntas basadas en el audio
+            let questionsHTML = '';
+            for (let i = 0; i < 5; i++) {
+                questionsHTML += `
+                    <div class="question">
+                        <p>Pregunta ${i+1}: [Texto de la pregunta]</p>
+                        <input type="radio" name="q${i}" value="a"> Opción A<br>
+                        <input type="radio" name="q${i}" value="b"> Opción B<br>
+                        <input type="radio" name="q${i}" value="c"> Opción C<br>
+                        <input type="radio" name="q${i}" value="d"> Opción D<br>
+                    </div>
+                `;
+            }
+            document.getElementById('questions-container').innerHTML = questionsHTML;
+        }
+
+        function submitListeningTest() {
+            // Lógica para enviar la prueba de escucha
+            document.getElementById('listening-test').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            showResults();
+        }
+
+        function showResults() {
+            // Aquí se mostrarían los resultados y la retroalimentación
+            document.getElementById('results-container').innerHTML = '<p>Tus resultados se están procesando...</p>';
+        }
+
+        function startTimer(elementId, duration, callback) {
+            let timer = duration, minutes, seconds;
+            let interval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                document.querySelector(`#${elementId} span`).textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    callback();
                 }
             }, 1000);
         }
 
-        function submitWriting() {
-            clearInterval(timer);
-            const text = document.getElementById('writing-area').value;
-            document.getElementById('writing-area').disabled = true;
-            document.getElementById('submit-writing').classList.add('hidden');
-            
-            // Aquí iría la lógica de evaluación automática
-            const feedback = evaluateWriting(text);
-            alert(feedback);
-
-            // Activar la siguiente prueba
-            document.getElementById('listening-test').classList.remove('hidden');
+        function finishWritingTest() {
+            alert('Se acabó el tiempo para la prueba de escritura');
+            submitWritingTest();
         }
 
-        function evaluateWriting(text) {
-            // Esta es una función de evaluación muy básica
-            const words = text.split(/\s+/).length;
-            let feedback = `Tu texto contiene ${words} palabras. `;
-            
-            if (words < 100) {
-                feedback += "Considera expandir tu respuesta para demostrar mejor tus habilidades.";
-            } else if (words > 300) {
-                feedback += "Has escrito una respuesta extensa, lo cual es excelente para demostrar tus habilidades.";
+        function finishListeningTest() {
+            alert('Se acabó el tiempo para la prueba de escucha');
+            submitListeningTest();
+        }
+
+        document.getElementById('audio-player').addEventListener('play', function() {
+            if (currentAudioPlays < maxAudioPlays) {
+                currentAudioPlays++;
+                document.getElementById('plays-left').textContent = maxAudioPlays - currentAudioPlays;
             } else {
-                feedback += "Has escrito una respuesta de longitud adecuada.";
-            }
-
-            return feedback;
-        }
-
-        // Prevenir copiar-pegar
-        document.getElementById('writing-area').addEventListener('copy', e => e.preventDefault());
-        document.getElementById('writing-area').addEventListener('cut', e => e.preventDefault());
-
-        // Limitar caracteres
-        document.getElementById('writing-area').addEventListener('input', function() {
-            const remaining = charLimit - this.value.length;
-            document.getElementById('char-count').textContent = remaining;
-            if (remaining < 0) {
-                this.value = this.value.slice(0, charLimit);
+                this.pause();
+                alert('Has alcanzado el número máximo de reproducciones');
             }
         });
-
-        // Bloquear complementos de corrección (esto es una aproximación, no es 100% efectivo)
-        document.getElementById('writing-area').setAttribute('spellcheck', 'false');
-        document.getElementById('writing-area').setAttribute('autocorrect', 'off');
-        document.getElementById('writing-area').setAttribute('autocapitalize', 'off');
     </script>
 </body>
 </html>
