@@ -12,396 +12,108 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #e6f2ff;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #e6f3ff;
         }
         h1, h2 {
-            color: #0066cc;
+            color: #006699;
+        }
+        .test-section {
+            background-color: #ffffff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         button {
-            background-color: #0066cc;
-            color: white;
+            background-color: #4CAF50;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
             cursor: pointer;
-            margin: 5px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #test-area {
-            margin-top: 20px;
+            border-radius: 5px;
         }
         textarea {
             width: 100%;
-            height: 200px;
-            margin-top: 10px;
-            border: 1px solid #0066cc;
-            border-radius: 5px;
-            padding: 10px;
+            height: 150px;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+            resize: none;
         }
-        #char-count, #time-left {
-            font-size: 0.9em;
-            color: #0066cc;
-        }
-        .question {
-            margin-top: 20px;
-            background-color: #f0f8ff;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .options {
-            display: flex;
-            flex-direction: column;
-        }
-        .option {
-            margin: 5px 0;
-        }
-        #audio-visualizer {
-            width: 100%;
-            height: 50px;
-            background-color: #f0f8ff;
-            margin-top: 10px;
-            border: 1px solid #0066cc;
-            border-radius: 5px;
+        #timer {
+            font-size: 24px;
+            color: #006699;
+            text-align: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Prueba de Nivel de Inglés</h1>
-        <div id="test-selection">
-            <h2>Seleccione una prueba:</h2>
-            <button onclick="startTest('writing')">Prueba de Escritura</button>
-            <button onclick="startTest('listening')">Prueba de Escucha</button>
-            <button onclick="startTest('speaking')">Prueba de Conversación</button>
-            <button onclick="showResults()">Ver Resultados</button>
-        </div>
-        <div id="test-area"></div>
+    <h1>Prueba de Nivel de Inglés</h1>
+    
+    <div class="test-section" id="writing-test">
+        <h2>Prueba 1: Escritura</h2>
+        <p>Tema: <span id="writing-topic"></span></p>
+        <textarea id="writing-area" placeholder="Escribe tu composición aquí..."></textarea>
+        <p>Caracteres restantes: <span id="char-count">500</span></p>
+        <div id="timer">Tiempo restante: 10:00</div>
+        <button onclick="submitWriting()">Enviar</button>
+    </div>
+
+    <div class="test-section" id="listening-test">
+        <h2>Prueba 2: Escucha</h2>
+        <audio id="audio-player" controls>
+            <source src="" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <div id="questions-container"></div>
+        <button onclick="submitListening()">Enviar</button>
+    </div>
+
+    <div class="test-section" id="speaking-test">
+        <h2>Prueba 3: Conversación</h2>
+        <p>Pregunta: <span id="speaking-question"></span></p>
+        <button onclick="startRecording()">Iniciar Grabación</button>
+        <button onclick="stopRecording()">Detener Grabación</button>
+        <audio id="recorded-audio" controls></audio>
+    </div>
+
+    <div class="test-section" id="results">
+        <h2>Prueba 4: Resultados</h2>
+        <div id="results-container"></div>
+        <button onclick="exportToPDF()">Exportar a PDF</button>
     </div>
 
     <script>
-        // Variables y funciones compartidas
-        let timeLeft = 0;
-        let timer;
-
-        function startTimer(duration, displayElement) {
-            clearInterval(timer);
-            timeLeft = duration;
-            timer = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                displayElement.textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    displayElement.textContent = "Tiempo terminado";
-                } else {
-                    timeLeft--;
-                }
-            }, 1000);
+        // Aquí irá el código JavaScript para la funcionalidad de las pruebas
+        function submitWriting() {
+            // Lógica para enviar la prueba de escritura
         }
 
-        function startTest(testType) {
-            if (testType === 'writing') {
-                startWritingTest();
-            } else if (testType === 'listening') {
-                startListeningTest();
-            } else if (testType === 'speaking') {
-                startSpeakingTest();
-            } else {
-                showResults();
-            }
-        }
-
-        // Prueba de Escritura
-        const topics = [
-            "Describe your ideal vacation",
-            "Talk about a challenge you've overcome",
-            "Discuss the importance of education",
-            "Explain how technology has changed our lives",
-            "Describe your plans for the future"
-        ];
-
-        let currentTopic = '';
-        let essayCount = 0;
-        const totalEssays = 3;
-
-        function startWritingTest() {
-            essayCount = 0;
-            nextEssay();
-        }
-
-        function nextEssay() {
-            if (essayCount >= totalEssays) {
-                finishWritingTest();
-                return;
-            }
-
-            essayCount++;
-            currentTopic = topics[Math.floor(Math.random() * topics.length)];
-            
-            const testArea = document.getElementById('test-area');
-            testArea.innerHTML = `
-                <h2>Prueba de Escritura - Ensayo ${essayCount}/${totalEssays}</h2>
-                <p>Tema: ${currentTopic}</p>
-                <p id="time-left">Tiempo restante: 10:00</p>
-                <textarea id="essay" placeholder="Escribe tu ensayo aquí..." maxlength="500"></textarea>
-                <p id="char-count">0/500 caracteres</p>
-                <button onclick="submitEssay()">Enviar Ensayo</button>
-            `;
-
-            const textarea = document.getElementById('essay');
-            textarea.addEventListener('input', updateCharCount);
-            textarea.addEventListener('paste', (e) => e.preventDefault());
-
-            startTimer(600, document.getElementById('time-left'));
-        }
-
-        function updateCharCount() {
-            const essay = document.getElementById('essay');
-            const charCount = document.getElementById('char-count');
-            charCount.textContent = `${essay.value.length}/500 caracteres`;
-        }
-
-        function submitEssay() {
-            clearInterval(timer);
-            const essay = document.getElementById('essay').value;
-            const feedback = provideFeedback(essay);
-            const testArea = document.getElementById('test-area');
-            testArea.innerHTML = `
-                <h2>Retroalimentación - Ensayo ${essayCount}</h2>
-                <p>${feedback}</p>
-                <button onclick="nextEssay()">Siguiente Ensayo</button>
-            `;
-        }
-
-        function provideFeedback(essay) {
-            const wordCount = essay.split(/\s+/).filter(word => word.length > 0).length;
-            let feedback = `Tu ensayo tiene ${wordCount} palabras. `;
-            if (wordCount < 100) {
-                feedback += "Considera expandir tu respuesta para demostrar mejor tus habilidades.";
-            } else if (wordCount > 300) {
-                feedback += "Has escrito una respuesta detallada. Asegúrate de que sea concisa y relevante al tema.";
-            } else {
-                feedback += "La longitud de tu ensayo es adecuada.";
-            }
-            return feedback;
-        }
-
-        function finishWritingTest() {
-            const testArea = document.getElementById('test-area');
-            testArea.innerHTML = `
-                <h2>Prueba de Escritura Completada</h2>
-                <p>Has completado todos los ensayos. Gracias por participar.</p>
-                <button onclick="showResults()">Ver Resultados</button>
-            `;
-        }
-
-        // Prueba de Escucha
-        const listeningTests = [
-            {
-                audio: "https://example.com/audio1.mp3",
-                questions: [
-                    {
-                        question: "What is the main topic of the conversation?",
-                        options: ["Weather", "Work", "Family", "Hobbies"],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "How does the speaker feel about their job?",
-                        options: ["Excited", "Neutral", "Frustrated", "Scared"],
-                        correctAnswer: 0
-                    }
-                ]
-            },
-            {
-                audio: "https://example.com/audio2.mp3",
-                questions: [
-                    {
-                        question: "Where are the speakers planning to go?",
-                        options: ["Beach", "Mountains", "City", "Countryside"],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "When are they planning their trip?",
-                        options: ["Next week", "Next month", "Next year", "Tomorrow"],
-                        correctAnswer: 1
-                    }
-                ]
-            }
-        ];
-
-        let currentListeningTest = 0;
-        let currentQuestion = 0;
-        let playCount = 0;
-        let userAnswers = [];
-
-        function startListeningTest() {
-            currentListeningTest = 0;
-            currentQuestion = 0;
-            playCount = 0;
-            userAnswers = [];
-            nextListeningQuestion();
-        }
-
-        function nextListeningQuestion() {
-            if (currentListeningTest >= listeningTests.length) {
-                finishListeningTest();
-                return;
-            }
-
-            const test = listeningTests[currentListeningTest];
-            const testArea = document.getElementById('test-area');
-            
-            if (currentQuestion === 0) {
-                playCount = 0;
-                testArea.innerHTML = `
-                    <h2>Prueba de Escucha - Audio ${currentListeningTest + 1}/${listeningTests.length}</h2>
-                    <p id="time-left">Tiempo restante: 5:00</p>
-                    <audio id="audio-player" src="${test.audio}"></audio>
-                    <button onclick="playAudio()">Reproducir Audio</button>
-                    <p id="play-count">Reproducciones: ${playCount}/2</p>
-                `;
-                startTimer(300, document.getElementById('time-left'));
-            } else {
-                const question = test.questions[currentQuestion - 1];
-                testArea.innerHTML += `
-                    <div class="question">
-                        <p>${question.question}</p>
-                        <div class="options">
-                            ${question.options.map((option, index) => `
-                                <label class="option">
-                                    <input type="radio" name="q${currentQuestion}" value="${index}">
-                                    ${option}
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (currentQuestion === test.questions.length) {
-                testArea.innerHTML += '<button onclick="submitListeningAnswers()">Enviar Respuestas</button>';
-            } else {
-                testArea.innerHTML += '<button onclick="nextListeningQuestion()">Siguiente Pregunta</button>';
-            }
-
-            currentQuestion++;
-        }
-
-        function playAudio() {
-            if (playCount < 2) {
-                const audio = document.getElementById('audio-player');
-                audio.play();
-                playCount++;
-                document.getElementById('play-count').textContent = `Reproducciones: ${playCount}/2`;
-            } else {
-                alert('Has alcanzado el límite de reproducciones.');
-            }
-        }
-
-        function submitListeningAnswers() {
-            clearInterval(timer);
-            const form = document.querySelector('#test-area');
-            const answers = Array.from(form.querySelectorAll('input[type="radio"]:checked')).map(input => parseInt(input.value));
-            userAnswers.push(...answers);
-            
-            currentListeningTest++;
-            currentQuestion = 0;
-            
-            if (currentListeningTest < listeningTests.length) {
-                nextListeningQuestion();
-            } else {
-                finishListeningTest();
-            }
-        }
-
-        function finishListeningTest() {
-            const testArea = document.getElementById('test-area');
-            let correctAnswers = 0;
-            userAnswers.forEach((answer, index) => {
-                const testIndex = Math.floor(index / 2);
-                const questionIndex = index % 2;
-                if (answer === listeningTests[testIndex].questions[questionIndex].correctAnswer) {
-                    correctAnswers++;
-                }
-            });
-            
-            const totalQuestions = listeningTests.reduce((sum, test) => sum + test.questions.length, 0);
-            const score = (correctAnswers / totalQuestions) * 100;
-            
-            testArea.innerHTML = `
-                <h2>Prueba de Escucha Completada</h2>
-                <p>Has respondido correctamente ${correctAnswers} de ${totalQuestions} preguntas.</p>
-                <p>Tu puntuación es: ${score.toFixed(2)}%</p>
-                <button onclick="showResults()">Ver Resultados Completos</button>
-            `;
-        }
-
-        // Prueba de Conversación
-        const speakingQuestions = [
-            "Tell me about your favorite hobby.",
-            "Describe your ideal vacation.",
-            "What do you think about social media?",
-            "How has technology changed our lives?",
-            "What are your plans for the future?"
-        ];
-
-        let currentSpeakingQuestion = 0;
-        let mediaRecorder;
-        let audioChunks = [];
-
-        function startSpeakingTest() {
-            currentSpeakingQuestion = 0;
-            nextSpeakingQuestion();
-        }
-
-        function nextSpeakingQuestion() {
-            if (currentSpeakingQuestion >= speakingQuestions.length) {
-                finishSpeakingTest();
-                return;
-            }
-
-            const testArea = document.getElementById('test-area');
-            testArea.innerHTML = `
-                <h2>Prueba de Conversación - Pregunta ${currentSpeakingQuestion + 1}/${speakingQuestions.length}</h2>
-                <p>${speakingQuestions[currentSpeakingQuestion]}</p>
-                <p id="time-left">Tiempo restante: 30 segundos</p>
-                <button id="start-recording">Comenzar Grabación</button>
-                <button id="stop-recording" disabled>Detener Grabación</button>
-                <div id="audio-visualizer"></div>
-                <audio id="audio-playback" controls style="display:none;"></audio>
-            `;
-
-            document.getElementById('start-recording').addEventListener('click', startRecording);
-            document.getElementById('stop-recording').addEventListener('click', stopRecording);
+        function submitListening() {
+            // Lógica para enviar la prueba de escucha
         }
 
         function startRecording() {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
+            // Lógica para iniciar la grabación de audio
+        }
 
-                    audioChunks = [];
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
+        function stopRecording() {
+            // Lógica para detener la grabación de audio
+        }
 
-                    mediaRecorder.addEventListener("stop", () => {
-                        const audioBlob = new Blob(audioChunks);
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        const audio = document.getElementById("audio-playback");
-                        audio.src = audioUrl;
-                        audio.style.display = "block";
-                    });
+        function exportToPDF() {
+            // Lógica para exportar resultados a PDF
+        }
 
-                    document.getElementById('start-recording').disabled = true;
-                    document.getElementById('stop-recording').disabled =
+        // Más funciones y lógica se agregarán aquí
+    </script>
+</body>
+</html>
