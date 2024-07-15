@@ -30,12 +30,22 @@
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
         button:hover {
             background-color: #0056b3;
         }
         #test-area {
             margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+        }
+        #char-count, #time-left {
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
 </head>
@@ -53,16 +63,121 @@
     </div>
 
     <script>
+        const topics = [
+            "Describe your ideal vacation",
+            "Talk about a challenge you've overcome",
+            "Discuss the importance of education",
+            "Explain how technology has changed our lives",
+            "Describe your plans for the future"
+        ];
+
+        let currentTopic = '';
+        let timeLeft = 600; // 10 minutes
+        let timer;
+        let essayCount = 0;
+        const totalEssays = 3; // This could be set by an admin in a real scenario
+
         function startTest(testType) {
+            if (testType === 'writing') {
+                startWritingTest();
+            } else {
+                const testArea = document.getElementById('test-area');
+                testArea.innerHTML = `<h2>Prueba de ${testType}</h2><p>Esta prueba aún no está implementada.</p>`;
+            }
+        }
+
+        function startWritingTest() {
+            essayCount = 0;
+            nextEssay();
+        }
+
+        function nextEssay() {
+            if (essayCount >= totalEssays) {
+                finishWritingTest();
+                return;
+            }
+
+            essayCount++;
+            currentTopic = topics[Math.floor(Math.random() * topics.length)];
+            timeLeft = 600;
+            
             const testArea = document.getElementById('test-area');
-            testArea.innerHTML = `<h2>Prueba de ${testType}</h2><p>Cargando prueba...</p>`;
-            // Aquí se cargaría la prueba específica
+            testArea.innerHTML = `
+                <h2>Prueba de Escritura - Ensayo ${essayCount}/${totalEssays}</h2>
+                <p>Tema: ${currentTopic}</p>
+                <p id="time-left">Tiempo restante: 10:00</p>
+                <textarea id="essay" placeholder="Escribe tu ensayo aquí..." maxlength="500"></textarea>
+                <p id="char-count">0/500 caracteres</p>
+                <button onclick="submitEssay()">Enviar Ensayo</button>
+            `;
+
+            const textarea = document.getElementById('essay');
+            textarea.addEventListener('input', updateCharCount);
+            textarea.addEventListener('paste', (e) => e.preventDefault());
+
+            startTimer();
+        }
+
+        function updateCharCount() {
+            const essay = document.getElementById('essay');
+            const charCount = document.getElementById('char-count');
+            charCount.textContent = `${essay.value.length}/500 caracteres`;
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('time-left').textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    submitEssay();
+                }
+            }, 1000);
+        }
+
+        function submitEssay() {
+            clearInterval(timer);
+            const essay = document.getElementById('essay').value;
+            // Here you would normally send the essay to a server for analysis
+            // For this demo, we'll just provide some basic feedback
+            const feedback = provideFeedback(essay);
+            const testArea = document.getElementById('test-area');
+            testArea.innerHTML = `
+                <h2>Retroalimentación - Ensayo ${essayCount}</h2>
+                <p>${feedback}</p>
+                <button onclick="nextEssay()">Siguiente Ensayo</button>
+            `;
+        }
+
+        function provideFeedback(essay) {
+            // This is a very basic feedback function
+            // In a real scenario, you'd use a more sophisticated analysis
+            const wordCount = essay.split(/\s+/).filter(word => word.length > 0).length;
+            let feedback = `Tu ensayo tiene ${wordCount} palabras. `;
+            if (wordCount < 100) {
+                feedback += "Considera expandir tu respuesta para demostrar mejor tus habilidades.";
+            } else if (wordCount > 300) {
+                feedback += "Has escrito una respuesta detallada. Asegúrate de que sea concisa y relevante al tema.";
+            } else {
+                feedback += "La longitud de tu ensayo es adecuada.";
+            }
+            return feedback;
+        }
+
+        function finishWritingTest() {
+            const testArea = document.getElementById('test-area');
+            testArea.innerHTML = `
+                <h2>Prueba de Escritura Completada</h2>
+                <p>Has completado todos los ensayos. Gracias por participar.</p>
+                <button onclick="showResults()">Ver Resultados</button>
+            `;
         }
 
         function showResults() {
             const testArea = document.getElementById('test-area');
-            testArea.innerHTML = '<h2>Resultados</h2><p>Cargando resultados...</p>';
-            // Aquí se mostrarían los resultados
+            testArea.innerHTML = '<h2>Resultados</h2><p>Los resultados detallados estarán disponibles próximamente.</p>';
         }
     </script>
 </body>
