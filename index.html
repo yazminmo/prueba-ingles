@@ -12,40 +12,42 @@
     <h1>Prueba de Nivel de Inglés</h1>
 
     <div id="writing-test" class="test-section">
-        <h2>Prueba 1: Escritura</h2>
-        <p>Tema: <span id="writing-topic"></span></p>
+        <h2>Test 1: Writing</h2>
+        <p>Topic: <span id="writing-topic"></span></p>
+        <p>Write an essay about the given topic. You have 500 characters and 10 minutes.</p>
         <textarea id="writing-area" rows="10" cols="50"></textarea>
-        <p>Caracteres restantes: <span id="char-count">500</span></p>
-        <div id="writing-timer">Tiempo restante: <span>10:00</span></div>
-        <button onclick="startWritingTest()">Comenzar prueba</button>
-        <button onclick="submitWritingTest()">Enviar</button>
+        <p>Characters remaining: <span id="char-count">500</span></p>
+        <div id="writing-timer">Time remaining: <span>10:00</span></div>
+        <button onclick="startWritingTest()">Start test</button>
+        <button onclick="submitWritingTest()">Submit</button>
     </div>
 
     <div id="listening-test" class="test-section hidden">
-        <h2>Prueba 2: Escucha</h2>
-        <p>Tema: <span id="listening-topic"></span></p>
+        <h2>Test 2: Listening</h2>
+        <p>Topic: <span id="listening-topic"></span></p>
+        <p>Listen to the audio and answer the questions below. You can play the audio twice.</p>
         <audio id="audio-player" controls>
             <source id="audio-source" src="" type="audio/mpeg">
-            Tu navegador no soporta el elemento de audio.
+            Your browser does not support the audio element.
         </audio>
-        <p>Reproducciones restantes: <span id="plays-left">2</span></p>
-        <div id="listening-timer">Tiempo restante: <span>05:00</span></div>
+        <p>Plays remaining: <span id="plays-left">2</span></p>
+        <div id="listening-timer">Time remaining: <span>05:00</span></div>
         <div id="questions-container"></div>
-        <button onclick="submitListeningTest()">Enviar respuestas</button>
+        <button onclick="submitListeningTest()">Submit answers</button>
     </div>
 
     <div id="results" class="test-section hidden">
-        <h2>Resultados</h2>
+        <h2>Results</h2>
         <div id="results-container"></div>
     </div>
 
     <script>
-        // Variables globales
-        let writingTopics = ['Viajes', 'Tecnología', 'Medio ambiente'];
-        let listeningTopics = ['Entrevista de trabajo', 'Conversación casual', 'Discusión académica'];
+        // Global variables
+        let writingTopics = ['Travel', 'Technology', 'Environment'];
+        let listeningTopics = ['Job Interview', 'Casual Conversation', 'Academic Discussion'];
         let currentAudioPlays = 0;
         let maxAudioPlays = 2;
-        let numberOfListeningTests = 3; // Configurable por el administrador
+        let numberOfListeningTests = 3; // Configurable by admin
 
         function startWritingTest() {
             document.getElementById('writing-topic').textContent = writingTopics[Math.floor(Math.random() * writingTopics.length)];
@@ -53,7 +55,7 @@
         }
 
         function submitWritingTest() {
-            // Lógica para enviar la prueba de escritura
+            // Logic to submit writing test
             document.getElementById('writing-test').classList.add('hidden');
             document.getElementById('listening-test').classList.remove('hidden');
             startListeningTest();
@@ -68,16 +70,16 @@
         }
 
         function generateQuestions() {
-            // Aquí se generarían las preguntas basadas en el audio
+            // Here we would generate questions based on the audio
             let questionsHTML = '';
             for (let i = 0; i < 5; i++) {
                 questionsHTML += `
                     <div class="question">
-                        <p>Pregunta ${i+1}: [Texto de la pregunta]</p>
-                        <input type="radio" name="q${i}" value="a"> Opción A<br>
-                        <input type="radio" name="q${i}" value="b"> Opción B<br>
-                        <input type="radio" name="q${i}" value="c"> Opción C<br>
-                        <input type="radio" name="q${i}" value="d"> Opción D<br>
+                        <p>Question ${i+1}: [Question text]</p>
+                        <input type="radio" name="q${i}" value="a"> Option A<br>
+                        <input type="radio" name="q${i}" value="b"> Option B<br>
+                        <input type="radio" name="q${i}" value="c"> Option C<br>
+                        <input type="radio" name="q${i}" value="d"> Option D<br>
                     </div>
                 `;
             }
@@ -85,15 +87,15 @@
         }
 
         function submitListeningTest() {
-            // Lógica para enviar la prueba de escucha
+            // Logic to submit listening test
             document.getElementById('listening-test').classList.add('hidden');
             document.getElementById('results').classList.remove('hidden');
             showResults();
         }
 
         function showResults() {
-            // Aquí se mostrarían los resultados y la retroalimentación
-            document.getElementById('results-container').innerHTML = '<p>Tus resultados se están procesando...</p>';
+            // Here we would show results and feedback
+            document.getElementById('results-container').innerHTML = '<p>Your results are being processed...</p>';
         }
 
         function startTimer(elementId, duration, callback) {
@@ -115,12 +117,12 @@
         }
 
         function finishWritingTest() {
-            alert('Se acabó el tiempo para la prueba de escritura');
+            alert('Time is up for the writing test');
             submitWritingTest();
         }
 
         function finishListeningTest() {
-            alert('Se acabó el tiempo para la prueba de escucha');
+            alert('Time is up for the listening test');
             submitListeningTest();
         }
 
@@ -130,7 +132,7 @@
                 document.getElementById('plays-left').textContent = maxAudioPlays - currentAudioPlays;
             } else {
                 this.pause();
-                alert('Has alcanzado el número máximo de reproducciones');
+                alert('You have reached the maximum number of plays');
             }
         });
     </script>
