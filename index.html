@@ -56,33 +56,24 @@
         .hidden {
             display: none;
         }
-        .question {
-            margin-bottom: 15px;
-        }
-        .options {
-            margin-left: 20px;
-        }
     </style>
 </head>
 <body>
     <h1>Prueba de Nivel de Inglés</h1>
     
     <div class="test-section" id="writing-test">
-        <!-- El contenido de la Prueba 1: Escritura permanece sin cambios -->
+        <h2>Prueba 1: Escritura</h2>
+        <p>Tema: <span id="writing-topic"></span></p>
+        <textarea id="writing-area" placeholder="Escribe tu composición aquí..." onpaste="return false;"></textarea>
+        <p>Caracteres restantes: <span id="char-count">500</span></p>
+        <div id="timer">Tiempo restante: 10:00</div>
+        <button id="start-writing" onclick="startWritingTest()">Comenzar prueba</button>
+        <button id="submit-writing" onclick="submitWriting()" class="hidden">Enviar</button>
     </div>
 
     <div class="test-section hidden" id="listening-test">
         <h2>Prueba 2: Escucha</h2>
-        <p>Tema: <span id="listening-topic"></span></p>
-        <audio id="audio-player" controls>
-            <source src="" type="audio/mpeg">
-            Tu navegador no soporta el elemento de audio.
-        </audio>
-        <p>Reproducciones restantes: <span id="plays-left">2</span></p>
-        <div id="listening-timer">Tiempo restante: 5:00</div>
-        <div id="questions-container"></div>
-        <button id="start-listening" onclick="startListeningTest()">Comenzar prueba</button>
-        <button id="submit-listening" onclick="submitListening()" class="hidden">Enviar respuestas</button>
+        <!-- Contenido de la prueba de escucha -->
     </div>
 
     <div class="test-section hidden" id="speaking-test">
@@ -96,124 +87,88 @@
     </div>
 
     <script>
-        // El código de la Prueba 1: Escritura permanece sin cambios
-
-        // Configuración para la Prueba 2: Escucha
-        const listeningTopics = [
-            "Una conversación sobre planes de viaje",
-            "Discusión sobre hábitos alimenticios saludables",
-            "Debate sobre el impacto de la tecnología en la educación"
+        // Configuración (en un escenario real, esto vendría de una base de datos o API)
+        const topics = [
+            "Describe tu día ideal",
+            "¿Cómo crees que será el futuro en 100 años?",
+            "Cuenta una experiencia memorable de tu pasado"
         ];
-        const listeningTimeLimit = 5 * 60; // 5 minutos en segundos
-        const maxPlays = 2;
-        let currentListeningTopic = '';
-        let listeningTimer;
-        let remainingListeningTime = listeningTimeLimit;
-        let playsLeft = maxPlays;
-        let currentQuestions = [];
+        const timeLimit = 10 * 60; // 10 minutos en segundos
+        const charLimit = 500;
 
-        function startListeningTest() {
-            document.getElementById('start-listening').classList.add('hidden');
-            document.getElementById('submit-listening').classList.remove('hidden');
-            currentListeningTopic = listeningTopics[Math.floor(Math.random() * listeningTopics.length)];
-            document.getElementById('listening-topic').textContent = currentListeningTopic;
-            
-            // En un escenario real, aquí se cargaría el audio correspondiente al tema
-            document.getElementById('audio-player').src = "path_to_audio_file.mp3";
-            
-            generateQuestions();
-            startListeningTimer();
-            
-            document.getElementById('audio-player').addEventListener('play', function() {
-                if (playsLeft > 0) {
-                    playsLeft--;
-                    document.getElementById('plays-left').textContent = playsLeft;
-                }
-                if (playsLeft === 0) {
-                    this.addEventListener('ended', function() {
-                        this.disabled = true;
-                    });
-                }
-            });
+        let currentTopic = '';
+        let timer;
+        let remainingTime = timeLimit;
+
+        function startWritingTest() {
+            document.getElementById('start-writing').classList.add('hidden');
+            document.getElementById('submit-writing').classList.remove('hidden');
+            currentTopic = topics[Math.floor(Math.random() * topics.length)];
+            document.getElementById('writing-topic').textContent = currentTopic;
+            document.getElementById('writing-area').disabled = false;
+            startTimer();
         }
 
-        function generateQuestions() {
-            // En un escenario real, estas preguntas se generarían basadas en el contenido del audio
-            const questions = [
-                {
-                    question: "¿Cuál es el tema principal de la conversación?",
-                    options: ["Opción A", "Opción B", "Opción C", "Opción D"]
-                },
-                {
-                    question: "¿Qué opinión expresó el primer hablante?",
-                    options: ["Opción A", "Opción B", "Opción C", "Opción D"]
-                },
-                {
-                    question: "¿Cuál fue la conclusión de la discusión?",
-                    options: ["Opción A", "Opción B", "Opción C", "Opción D"]
-                }
-            ];
-
-            const container = document.getElementById('questions-container');
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question';
-                questionDiv.innerHTML = `
-                    <p>${index + 1}. ${q.question}</p>
-                    <div class="options">
-                        ${q.options.map((option, i) => `
-                            <div>
-                                <input type="radio" id="q${index}o${i}" name="q${index}" value="${option}">
-                                <label for="q${index}o${i}">${option}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                container.appendChild(questionDiv);
-            });
-
-            currentQuestions = questions;
-        }
-
-        function startListeningTimer() {
-            listeningTimer = setInterval(() => {
-                remainingListeningTime--;
-                const minutes = Math.floor(remainingListeningTime / 60);
-                const seconds = remainingListeningTime % 60;
-                document.getElementById('listening-timer').textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                if (remainingListeningTime <= 0) {
-                    clearInterval(listeningTimer);
-                    submitListening();
+        function startTimer() {
+            timer = setInterval(() => {
+                remainingTime--;
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                document.getElementById('timer').textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (remainingTime <= 0) {
+                    clearInterval(timer);
+                    submitWriting();
                 }
             }, 1000);
         }
 
-        function submitListening() {
-            clearInterval(listeningTimer);
-            document.getElementById('audio-player').disabled = true;
-            document.getElementById('submit-listening').classList.add('hidden');
+        function submitWriting() {
+            clearInterval(timer);
+            const text = document.getElementById('writing-area').value;
+            document.getElementById('writing-area').disabled = true;
+            document.getElementById('submit-writing').classList.add('hidden');
             
             // Aquí iría la lógica de evaluación automática
-            const feedback = evaluateListening();
+            const feedback = evaluateWriting(text);
             alert(feedback);
 
             // Activar la siguiente prueba
-            document.getElementById('speaking-test').classList.remove('hidden');
+            document.getElementById('listening-test').classList.remove('hidden');
         }
 
-        function evaluateListening() {
+        function evaluateWriting(text) {
             // Esta es una función de evaluación muy básica
-            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
-            let feedback = `Has respondido ${answeredQuestions} de ${currentQuestions.length} preguntas. `;
+            const words = text.split(/\s+/).length;
+            let feedback = `Tu texto contiene ${words} palabras. `;
             
-            if (answeredQuestions === currentQuestions.length) {
-                feedback += "Has completado todas las preguntas. Buen trabajo!";
+            if (words < 100) {
+                feedback += "Considera expandir tu respuesta para demostrar mejor tus habilidades.";
+            } else if (words > 300) {
+                feedback += "Has escrito una respuesta extensa, lo cual es excelente para demostrar tus habilidades.";
             } else {
-                feedback += "Asegúrate de responder todas las preguntas la próxima vez.";
+                feedback += "Has escrito una respuesta de longitud adecuada.";
             }
 
             return feedback;
         }
+
+        // Prevenir copiar-pegar
+        document.getElementById('writing-area').addEventListener('copy', e => e.preventDefault());
+        document.getElementById('writing-area').addEventListener('cut', e => e.preventDefault());
+
+        // Limitar caracteres
+        document.getElementById('writing-area').addEventListener('input', function() {
+            const remaining = charLimit - this.value.length;
+            document.getElementById('char-count').textContent = remaining;
+            if (remaining < 0) {
+                this.value = this.value.slice(0, charLimit);
+            }
+        });
+
+        // Bloquear complementos de corrección (esto es una aproximación, no es 100% efectivo)
+        document.getElementById('writing-area').setAttribute('spellcheck', 'false');
+        document.getElementById('writing-area').setAttribute('autocorrect', 'off');
+        document.getElementById('writing-area').setAttribute('autocapitalize', 'off');
     </script>
 </body>
 </html>
