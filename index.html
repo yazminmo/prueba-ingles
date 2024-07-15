@@ -36,6 +36,26 @@
         <button onclick="submitListeningTest()">Submit answers</button>
     </div>
 
+    <div id="speaking-test" class="test-section hidden">
+        <h2>Test 3: Speaking</h2>
+        <p>Topic: <span id="speaking-topic"></span></p>
+        <p>Listen to each question and record your answer. You have 30 seconds for each response.</p>
+        <div id="speaking-question-container">
+            <audio id="question-audio-player" controls>
+                <source id="question-audio-source" src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <div id="speaking-answer-container">
+            <button id="start-recording">Start Recording</button>
+            <button id="stop-recording" disabled>Stop Recording</button>
+            <audio id="answer-audio-player" controls></audio>
+        </div>
+        <div id="speaking-timer">Time remaining: <span>00:30</span></div>
+        <button onclick="nextQuestion()" id="next-question">Next Question</button>
+        <button onclick="submitSpeakingTest()" id="submit-speaking" class="hidden">Submit Test</button>
+    </div>
+
     <div id="results" class="test-section hidden">
         <h2>Results</h2>
         <div id="results-container"></div>
@@ -45,9 +65,14 @@
         // Global variables
         let writingTopics = ['Travel', 'Technology', 'Environment'];
         let listeningTopics = ['Job Interview', 'Casual Conversation', 'Academic Discussion'];
+        let speakingTopics = ['Personal Interests', 'Future Plans', 'Current Events'];
         let currentAudioPlays = 0;
         let maxAudioPlays = 2;
         let numberOfListeningTests = 3; // Configurable by admin
+        let numberOfSpeakingQuestions = 5; // Configurable by admin
+        let currentSpeakingQuestion = 0;
+        let mediaRecorder;
+        let audioChunks = [];
 
         function startWritingTest() {
             document.getElementById('writing-topic').textContent = writingTopics[Math.floor(Math.random() * writingTopics.length)];
@@ -55,7 +80,6 @@
         }
 
         function submitWritingTest() {
-            // Logic to submit writing test
             document.getElementById('writing-test').classList.add('hidden');
             document.getElementById('listening-test').classList.remove('hidden');
             startListeningTest();
@@ -65,12 +89,11 @@
             document.getElementById('listening-topic').textContent = listeningTopics[Math.floor(Math.random() * listeningTopics.length)];
             document.getElementById('audio-source').src = `audio/${document.getElementById('listening-topic').textContent.toLowerCase().replace(' ', '_')}.mp3`;
             document.getElementById('audio-player').load();
-            generateQuestions();
+            generateListeningQuestions();
             startTimer('listening-timer', 300, finishListeningTest);
         }
 
-        function generateQuestions() {
-            // Here we would generate questions based on the audio
+        function generateListeningQuestions() {
             let questionsHTML = '';
             for (let i = 0; i < 5; i++) {
                 questionsHTML += `
@@ -87,14 +110,40 @@
         }
 
         function submitListeningTest() {
-            // Logic to submit listening test
             document.getElementById('listening-test').classList.add('hidden');
+            document.getElementById('speaking-test').classList.remove('hidden');
+            startSpeakingTest();
+        }
+
+        function startSpeakingTest() {
+            document.getElementById('speaking-topic').textContent = speakingTopics[Math.floor(Math.random() * speakingTopics.length)];
+            currentSpeakingQuestion = 0;
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentSpeakingQuestion < numberOfSpeakingQuestions) {
+                document.getElementById('question-audio-source').src = `audio/question_${currentSpeakingQuestion + 1}.mp3`;
+                document.getElementById('question-audio-player').load();
+                document.getElementById('answer-audio-player').src = '';
+                document.getElementById('start-recording').disabled = false;
+                document.getElementById('stop-recording').disabled = true;
+                currentSpeakingQuestion++;
+                
+                if (currentSpeakingQuestion === numberOfSpeakingQuestions) {
+                    document.getElementById('next-question').classList.add('hidden');
+                    document.getElementById('submit-speaking').classList.remove('hidden');
+                }
+            }
+        }
+
+        function submitSpeakingTest() {
+            document.getElementById('speaking-test').classList.add('hidden');
             document.getElementById('results').classList.remove('hidden');
             showResults();
         }
 
         function showResults() {
-            // Here we would show results and feedback
             document.getElementById('results-container').innerHTML = '<p>Your results are being processed...</p>';
         }
 
@@ -135,6 +184,39 @@
                 alert('You have reached the maximum number of plays');
             }
         });
+
+        document.getElementById('start-recording').addEventListener('click', function() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    audioChunks = [];
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById('answer-audio-player').src = audioUrl;
+                    });
+
+                    this.disabled = true;
+                    document.getElementById('stop-recording').disabled = false;
+                    startTimer('speaking-timer', 30, stopRecording);
+                });
+        });
+
+        document.getElementById('stop-recording').addEventListener('click', stopRecording);
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                document.getElementById('start-recording').disabled = false;
+                document.getElementById('stop-recording').disabled = true;
+            }
+        }
     </script>
 </body>
 </html>
