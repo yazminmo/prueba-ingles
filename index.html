@@ -53,6 +53,9 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -61,59 +64,111 @@
     <div class="test-section" id="writing-test">
         <h2>Prueba 1: Escritura</h2>
         <p>Tema: <span id="writing-topic"></span></p>
-        <textarea id="writing-area" placeholder="Escribe tu composición aquí..."></textarea>
+        <textarea id="writing-area" placeholder="Escribe tu composición aquí..." onpaste="return false;"></textarea>
         <p>Caracteres restantes: <span id="char-count">500</span></p>
         <div id="timer">Tiempo restante: 10:00</div>
-        <button onclick="submitWriting()">Enviar</button>
+        <button id="start-writing" onclick="startWritingTest()">Comenzar prueba</button>
+        <button id="submit-writing" onclick="submitWriting()" class="hidden">Enviar</button>
     </div>
 
-    <div class="test-section" id="listening-test">
+    <div class="test-section hidden" id="listening-test">
         <h2>Prueba 2: Escucha</h2>
-        <audio id="audio-player" controls>
-            <source src="" type="audio/mpeg">
-            Tu navegador no soporta el elemento de audio.
-        </audio>
-        <div id="questions-container"></div>
-        <button onclick="submitListening()">Enviar</button>
+        <!-- Contenido de la prueba de escucha -->
     </div>
 
-    <div class="test-section" id="speaking-test">
+    <div class="test-section hidden" id="speaking-test">
         <h2>Prueba 3: Conversación</h2>
-        <p>Pregunta: <span id="speaking-question"></span></p>
-        <button onclick="startRecording()">Iniciar Grabación</button>
-        <button onclick="stopRecording()">Detener Grabación</button>
-        <audio id="recorded-audio" controls></audio>
+        <!-- Contenido de la prueba de conversación -->
     </div>
 
-    <div class="test-section" id="results">
+    <div class="test-section hidden" id="results">
         <h2>Prueba 4: Resultados</h2>
-        <div id="results-container"></div>
-        <button onclick="exportToPDF()">Exportar a PDF</button>
+        <!-- Contenido de los resultados -->
     </div>
 
     <script>
-        // Aquí irá el código JavaScript para la funcionalidad de las pruebas
+        // Configuración (en un escenario real, esto vendría de una base de datos o API)
+        const topics = [
+            "Describe tu día ideal",
+            "¿Cómo crees que será el futuro en 100 años?",
+            "Cuenta una experiencia memorable de tu pasado"
+        ];
+        const timeLimit = 10 * 60; // 10 minutos en segundos
+        const charLimit = 500;
+
+        let currentTopic = '';
+        let timer;
+        let remainingTime = timeLimit;
+
+        function startWritingTest() {
+            document.getElementById('start-writing').classList.add('hidden');
+            document.getElementById('submit-writing').classList.remove('hidden');
+            currentTopic = topics[Math.floor(Math.random() * topics.length)];
+            document.getElementById('writing-topic').textContent = currentTopic;
+            document.getElementById('writing-area').disabled = false;
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                remainingTime--;
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                document.getElementById('timer').textContent = `Tiempo restante: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (remainingTime <= 0) {
+                    clearInterval(timer);
+                    submitWriting();
+                }
+            }, 1000);
+        }
+
         function submitWriting() {
-            // Lógica para enviar la prueba de escritura
+            clearInterval(timer);
+            const text = document.getElementById('writing-area').value;
+            document.getElementById('writing-area').disabled = true;
+            document.getElementById('submit-writing').classList.add('hidden');
+            
+            // Aquí iría la lógica de evaluación automática
+            const feedback = evaluateWriting(text);
+            alert(feedback);
+
+            // Activar la siguiente prueba
+            document.getElementById('listening-test').classList.remove('hidden');
         }
 
-        function submitListening() {
-            // Lógica para enviar la prueba de escucha
+        function evaluateWriting(text) {
+            // Esta es una función de evaluación muy básica
+            const words = text.split(/\s+/).length;
+            let feedback = `Tu texto contiene ${words} palabras. `;
+            
+            if (words < 100) {
+                feedback += "Considera expandir tu respuesta para demostrar mejor tus habilidades.";
+            } else if (words > 300) {
+                feedback += "Has escrito una respuesta extensa, lo cual es excelente para demostrar tus habilidades.";
+            } else {
+                feedback += "Has escrito una respuesta de longitud adecuada.";
+            }
+
+            return feedback;
         }
 
-        function startRecording() {
-            // Lógica para iniciar la grabación de audio
-        }
+        // Prevenir copiar-pegar
+        document.getElementById('writing-area').addEventListener('copy', e => e.preventDefault());
+        document.getElementById('writing-area').addEventListener('cut', e => e.preventDefault());
 
-        function stopRecording() {
-            // Lógica para detener la grabación de audio
-        }
+        // Limitar caracteres
+        document.getElementById('writing-area').addEventListener('input', function() {
+            const remaining = charLimit - this.value.length;
+            document.getElementById('char-count').textContent = remaining;
+            if (remaining < 0) {
+                this.value = this.value.slice(0, charLimit);
+            }
+        });
 
-        function exportToPDF() {
-            // Lógica para exportar resultados a PDF
-        }
-
-        // Más funciones y lógica se agregarán aquí
+        // Bloquear complementos de corrección (esto es una aproximación, no es 100% efectivo)
+        document.getElementById('writing-area').setAttribute('spellcheck', 'false');
+        document.getElementById('writing-area').setAttribute('autocorrect', 'off');
+        document.getElementById('writing-area').setAttribute('autocapitalize', 'off');
     </script>
 </body>
 </html>
